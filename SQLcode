@@ -1,0 +1,122 @@
+-- ===========================================
+-- BANCO DE DADOS: Oficina Mecânica
+-- ===========================================
+
+CREATE DATABASE IF NOT EXISTS oficina_mecanica;
+USE oficina_mecanica;
+
+-- ===========================================
+-- TABELA: CLIENTE
+-- ===========================================
+CREATE TABLE cliente (
+    id_cliente INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    endereco VARCHAR(200),
+    telefone VARCHAR(20),
+    email VARCHAR(100)
+);
+
+-- ===========================================
+-- TABELA: VEICULO
+-- ===========================================
+CREATE TABLE veiculo (
+    id_veiculo INT AUTO_INCREMENT PRIMARY KEY,
+    id_cliente INT NOT NULL,
+    placa VARCHAR(10) UNIQUE NOT NULL,
+    modelo VARCHAR(50) NOT NULL,
+    marca VARCHAR(50),
+    ano_fabricacao YEAR,
+    FOREIGN KEY (id_cliente) REFERENCES cliente(id_cliente)
+        ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+-- ===========================================
+-- TABELA: EQUIPE
+-- ===========================================
+CREATE TABLE equipe (
+    id_equipe INT AUTO_INCREMENT PRIMARY KEY,
+    nome_equipe VARCHAR(100) NOT NULL
+);
+
+-- ===========================================
+-- TABELA: MECANICO
+-- ===========================================
+CREATE TABLE mecanico (
+    id_mecanico INT AUTO_INCREMENT PRIMARY KEY,
+    id_equipe INT NOT NULL,
+    nome VARCHAR(100) NOT NULL,
+    endereco VARCHAR(200),
+    especialidade VARCHAR(100),
+    FOREIGN KEY (id_equipe) REFERENCES equipe(id_equipe)
+        ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+-- ===========================================
+-- TABELA: ORDEM DE SERVIÇO
+-- ===========================================
+CREATE TABLE ordem_servico (
+    id_os INT AUTO_INCREMENT PRIMARY KEY,
+    id_veiculo INT NOT NULL,
+    id_equipe INT NOT NULL,
+    data_emissao DATE NOT NULL,
+    data_conclusao_prevista DATE,
+    status ENUM('Aguardando Autorização', 'Em Execução', 'Concluída', 'Cancelada') DEFAULT 'Aguardando Autorização',
+    valor_total DECIMAL(10,2) DEFAULT 0,
+    FOREIGN KEY (id_veiculo) REFERENCES veiculo(id_veiculo)
+        ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (id_equipe) REFERENCES equipe(id_equipe)
+        ON UPDATE CASCADE ON DELETE SET NULL
+);
+
+-- ===========================================
+-- TABELA: SERVICO
+-- ===========================================
+CREATE TABLE servico (
+    id_servico INT AUTO_INCREMENT PRIMARY KEY,
+    descricao VARCHAR(150) NOT NULL,
+    valor_mao_obra DECIMAL(10,2) NOT NULL
+);
+
+-- ===========================================
+-- TABELA: PEÇA
+-- ===========================================
+CREATE TABLE peca (
+    id_peca INT AUTO_INCREMENT PRIMARY KEY,
+    descricao VARCHAR(150) NOT NULL,
+    valor_unitario DECIMAL(10,2) NOT NULL,
+    fabricante VARCHAR(100)
+);
+
+-- ===========================================
+-- TABELA ASSOCIATIVA: OS_SERVICO
+-- ===========================================
+CREATE TABLE os_servico (
+    id_os INT NOT NULL,
+    id_servico INT NOT NULL,
+    quantidade INT DEFAULT 1,
+    subtotal DECIMAL(10,2) GENERATED ALWAYS AS (quantidade * (
+        SELECT valor_mao_obra FROM servico WHERE servico.id_servico = os_servico.id_servico
+    )) STORED,
+    PRIMARY KEY (id_os, id_servico),
+    FOREIGN KEY (id_os) REFERENCES ordem_servico(id_os)
+        ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (id_servico) REFERENCES servico(id_servico)
+        ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+-- ===========================================
+-- TABELA ASSOCIATIVA: OS_PECA
+-- ===========================================
+CREATE TABLE os_peca (
+    id_os INT NOT NULL,
+    id_peca INT NOT NULL,
+    quantidade INT DEFAULT 1,
+    subtotal DECIMAL(10,2) GENERATED ALWAYS AS (quantidade * (
+        SELECT valor_unitario FROM peca WHERE peca.id_peca = os_peca.id_peca
+    )) STORED,
+    PRIMARY KEY (id_os, id_peca),
+    FOREIGN KEY (id_os) REFERENCES ordem_servico(id_os)
+        ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (id_peca) REFERENCES peca(id_peca)
+        ON UPDATE CASCADE ON DELETE CASCADE
+);
