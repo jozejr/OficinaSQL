@@ -1,0 +1,35 @@
+-- Clientes
+INSERT INTO Cliente (Nome, CPF, Telefone, Email) VALUES
+('Carlos Silva','12345678901','11987654321','carlos@email.com'),
+('Maria Souza','98765432100','11911223344','maria@email.com');
+
+-- Veículos
+INSERT INTO Veiculo (ClienteID, Placa, Modelo, Marca, Ano, Cor) VALUES
+(1,'ABC1234','Gol','Volkswagen',2015,'Prata'),
+(2,'XYZ5678','Civic','Honda',2018,'Preto');
+
+-- Fornecedores
+INSERT INTO Fornecedor (Nome, CNPJ, Telefone, Email) VALUES
+('Fornecedor X','11122233344455','11123456789','fornecedorx@email.com');
+
+-- Produtos
+INSERT INTO Produto (Nome, Descricao, Preco, Estoque, FornecedorID) VALUES
+('Óleo 5W30','Óleo para motor',120.00,50,1),
+('Filtro de óleo','Filtro padrão',45.00,30,1);
+
+-- Funcionários
+INSERT INTO Funcionario (Nome, Cargo, Telefone, Email, Salario) VALUES
+('João Mecânico','Mecânico','11999887766','joao@oficina.com',3000.00);
+
+-- Ordem de Serviço
+INSERT INTO OrdemServico (VeiculoID, FuncionarioID, DataSaidaPrevista, StatusServico) VALUES
+(1,1,DATE_ADD(NOW(),INTERVAL 2 DAY),'Aberto');
+
+-- ItemServico
+INSERT INTO ItemServico (OrdemID, ProdutoID, Quantidade, PrecoUnitario) VALUES
+(1,1,1,120.00),
+(1,2,1,45.00);
+
+-- Pagamento
+INSERT INTO Pagamento (OrdemID, TipoPagamento, Valor, StatusPagamento, DataPagamento) VALUES
+(1,'Cartao',165.00,'Confirmado',NOW());
